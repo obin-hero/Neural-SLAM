@@ -3,79 +3,80 @@ import sys
 import matplotlib
 import numpy as np
 
-if sys.platform == 'darwin':
-    matplotlib.use("tkagg")
-else:
-    matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 import seaborn as sns
 import skimage
-
-
+import time
+import cv2
 def visualize(fig, ax, img, grid, pos, gt_pos, dump_dir, rank, ep_no, t,
               visualize, print_images, vis_style):
-    for i in range(2):
-        ax[i].clear()
-        ax[i].set_yticks([])
-        ax[i].set_xticks([])
-        ax[i].set_yticklabels([])
-        ax[i].set_xticklabels([])
+    s = time.time()
+    #print(img.shape, grid.shape)
+    grid = cv2.resize(grid,(img.shape[0],img.shape[0]))
+    img = np.concatenate([img,grid],1)
+    cv2.imshow('s', img[:,:,::-1])
+    cv2.waitKey(0)
+    # for i in range(2):
+    #     ax[i].clear()
+    #     ax[i].set_yticks([])
+    #     ax[i].set_xticks([])
+    #     ax[i].set_yticklabels([])
+    #     ax[i].set_xticklabels([])
+    # ax[0].imshow(img)
+    # ax[0].set_title("Observation", family='sans-serif',
+    #                 fontname='Helvetica',
+    #                 fontsize=20)
+    #
+    # if vis_style == 1:
+    #     title = "Predicted Map and Pose"
+    # else:
+    #     title = "Ground-Truth Map and Pose"
+    #
+    # ax[1].imshow(grid)
+    # ax[1].set_title(title, family='sans-serif',
+    #                 fontname='Helvetica',
+    #                 fontsize=20)
+    #
+    # # Draw GT agent pose
+    # agent_size = 8
+    # x, y, o = gt_pos
+    # x, y = x * 100.0 / 5.0, grid.shape[1] - y * 100.0 / 5.0
+    #
+    # dx = 0
+    # dy = 0
+    # fc = 'Grey'
+    # dx = np.cos(np.deg2rad(o))
+    # dy = -np.sin(np.deg2rad(o))
+    # ax[1].arrow(x - 1 * dx, y - 1 * dy, dx * agent_size, dy * (agent_size * 1.25),
+    #             head_width=agent_size, head_length=agent_size * 1.25,
+    #             length_includes_head=True, fc=fc, ec=fc, alpha=0.9)
+    #
+    # # Draw predicted agent pose
+    # x, y, o = pos
+    # x, y = x * 100.0 / 5.0, grid.shape[1] - y * 100.0 / 5.0
+    #
+    # dx = 0
+    # dy = 0
+    # fc = 'Red'
+    # dx = np.cos(np.deg2rad(o))
+    # dy = -np.sin(np.deg2rad(o))
+    # ax[1].arrow(x - 1 * dx, y - 1 * dy, dx * agent_size, dy * agent_size * 1.25,
+    #             head_width=agent_size, head_length=agent_size * 1.25,
+    #             length_includes_head=True, fc=fc, ec=fc, alpha=0.6)
+    #
+    # for _ in range(5):
+    #     plt.tight_layout()
+    print('vis', time.time() - s)
+    # if False:
+    #     plt.gcf().canvas.flush_events()
+    #     fig.canvas.start_event_loop(0.001)
+    #     plt.gcf().canvas.flush_events()
 
-    ax[0].imshow(img)
-    ax[0].set_title("Observation", family='sans-serif',
-                    fontname='Helvetica',
-                    fontsize=20)
-
-    if vis_style == 1:
-        title = "Predicted Map and Pose"
-    else:
-        title = "Ground-Truth Map and Pose"
-
-    ax[1].imshow(grid)
-    ax[1].set_title(title, family='sans-serif',
-                    fontname='Helvetica',
-                    fontsize=20)
-
-    # Draw GT agent pose
-    agent_size = 8
-    x, y, o = gt_pos
-    x, y = x * 100.0 / 5.0, grid.shape[1] - y * 100.0 / 5.0
-
-    dx = 0
-    dy = 0
-    fc = 'Grey'
-    dx = np.cos(np.deg2rad(o))
-    dy = -np.sin(np.deg2rad(o))
-    ax[1].arrow(x - 1 * dx, y - 1 * dy, dx * agent_size, dy * (agent_size * 1.25),
-                head_width=agent_size, head_length=agent_size * 1.25,
-                length_includes_head=True, fc=fc, ec=fc, alpha=0.9)
-
-    # Draw predicted agent pose
-    x, y, o = pos
-    x, y = x * 100.0 / 5.0, grid.shape[1] - y * 100.0 / 5.0
-
-    dx = 0
-    dy = 0
-    fc = 'Red'
-    dx = np.cos(np.deg2rad(o))
-    dy = -np.sin(np.deg2rad(o))
-    ax[1].arrow(x - 1 * dx, y - 1 * dy, dx * agent_size, dy * agent_size * 1.25,
-                head_width=agent_size, head_length=agent_size * 1.25,
-                length_includes_head=True, fc=fc, ec=fc, alpha=0.6)
-
-    for _ in range(5):
-        plt.tight_layout()
-
-    if visualize:
-        plt.gcf().canvas.flush_events()
-        fig.canvas.start_event_loop(0.001)
-        plt.gcf().canvas.flush_events()
-
-    if print_images:
-        fn = '{}/episodes/{}/{}/{}-{}-Vis-{}.png'.format(
-            dump_dir, (rank + 1), ep_no, rank, ep_no, t)
-        plt.savefig(fn)
+    # if print_images:
+    #     fn = '{}/episodes/{}/{}/{}-{}-Vis-{}.png'.format(
+    #         dump_dir, (rank + 1), ep_no, rank, ep_no, t)
+    #     plt.savefig(fn)
 
 
 def insert_circle(mat, x, y, value):

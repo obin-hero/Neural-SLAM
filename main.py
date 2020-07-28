@@ -1,3 +1,6 @@
+import sys
+if '/opt/ros/kinetic/lib/python2.7/dist-packages' in sys.path:
+    sys.path.remove('/opt/ros/kinetic/lib/python2.7/dist-packages')
 import time
 from collections import deque
 
@@ -22,8 +25,7 @@ import algo
 import sys
 import matplotlib
 
-if sys.platform == 'darwin':
-    matplotlib.use("tkagg")
+
 import matplotlib.pyplot as plt
 
 # plt.ion()
