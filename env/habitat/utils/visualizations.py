@@ -3,6 +3,10 @@ import sys
 import matplotlib
 import numpy as np
 
+if sys.platform == 'darwin':
+    matplotlib.use("tkagg")
+else:
+    matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 import seaborn as sns
@@ -13,9 +17,9 @@ def visualize(fig, ax, img, grid, pos, gt_pos, dump_dir, rank, ep_no, t,
               visualize, print_images, vis_style):
     s = time.time()
     #print(img.shape, grid.shape)
-    grid = cv2.resize(grid,(img.shape[0],img.shape[0]))
-    img = np.concatenate([img,grid],1)
-    cv2.imshow('s', img[:,:,::-1])
+    grid = cv2.resize(grid,(img.shape[0],img.shape[1]))
+    img = np.concatenate([img,grid],0)
+    cv2.imshow('s', img)
     cv2.waitKey(0)
     # for i in range(2):
     #     ax[i].clear()

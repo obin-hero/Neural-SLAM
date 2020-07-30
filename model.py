@@ -7,8 +7,10 @@ import numpy as np
 from utils.distributions import Categorical, DiagGaussian
 from utils.model import get_grid, ChannelPool, Flatten, NNBase
 
+
 # Global Policy model code
 class Global_Policy(NNBase):
+
     def __init__(self, input_shape, recurrent=False, hidden_size=512,
                  downscaling=1):
         super(Global_Policy, self).__init__(recurrent, hidden_size,
@@ -52,6 +54,7 @@ class Global_Policy(NNBase):
         x = nn.ReLU()(self.linear2(x))
 
         return self.critic_linear(x).squeeze(-1), x, rnn_hxs
+
 
 # Neural SLAM Module code
 class Neural_SLAM_Module(nn.Module):

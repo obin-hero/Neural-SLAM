@@ -25,7 +25,8 @@ import algo
 import sys
 import matplotlib
 
-
+if sys.platform == 'darwin':
+    matplotlib.use("tkagg")
 import matplotlib.pyplot as plt
 
 # plt.ion()

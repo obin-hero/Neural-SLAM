@@ -97,27 +97,6 @@ class NoisyLeft(habitat_sim.SceneNodeControl):
             actuation_spec.action,
         )
 
-from habitat.tasks.nav.nav import SimulatorTaskAction
-@habitat.registry.register_task_action
-class NOISYFORWARD(SimulatorTaskAction):
-    def _get_uuid(self, *args, **kwargs) -> str:
-        return "noisy_forward"
-    def step(self, *args, **kwargs):
-        return self._sim.step(HabitatSimActions.NOISY_FORWARD)
-
-@habitat.registry.register_task_action
-class NOISYLEFT(SimulatorTaskAction):
-    def _get_uuid(self, *args, **kwargs) -> str:
-        return "noisy_left"
-    def step(self, *args, **kwargs):
-        return self._sim.step(HabitatSimActions.NOISY_LEFT)
-@habitat.registry.register_task_action
-class NOISYRIGHT(SimulatorTaskAction):
-    def _get_uuid(self, *args, **kwargs) -> str:
-        return "noisy_right"
-    def step(self, *args, **kwargs):
-        return self._sim.step(HabitatSimActions.NOISY_RIGHT)
-
 
 @habitat.registry.register_action_space_configuration
 class CustomActionSpaceConfiguration(HabitatSimV0ActionSpaceConfiguration):

@@ -85,7 +85,7 @@ def get_args():
     parser.add_argument('-no', '--noisy_odometry', type=int, default=1)
     parser.add_argument('--camera_height', type=float, default=1.25,
                         help="agent camera height in metres")
-    parser.add_argument('--hfov', type=float, default=30.0,
+    parser.add_argument('--hfov', type=float, default=90.0,
                         help="horizontal field of view in degrees")
     parser.add_argument('--randomize_env_every', type=int, default=1000,
                         help="randomize scene in a thread every k episodes")

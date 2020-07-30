@@ -4,6 +4,7 @@ import pickle
 import sys
 
 import gym
+import matplotlib
 import numpy as np
 import quaternion
 import skimage.morphology
@@ -11,6 +12,11 @@ import torch
 from PIL import Image
 from torch.nn import functional as F
 from torchvision import transforms
+
+if sys.platform == 'darwin':
+    matplotlib.use("tkagg")
+else:
+    matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 import habitat
@@ -20,7 +26,6 @@ from env.utils.map_builder import MapBuilder
 from env.utils.fmm_planner import FMMPlanner
 
 from env.habitat.utils.noisy_actions import CustomActionSpaceConfiguration
-from env.habitat.habitat_env import RLEnv
 from env.habitat.utils import pose as pu
 from env.habitat.utils import visualizations as vu
 from env.habitat.utils.supervision import HabitatMaps
@@ -43,9 +48,9 @@ def _preprocess_depth(depth):
     return depth
 
 
-class Exploration_Env(RLEnv):
+class Exploration_Env(habitat.RLEnv):
 
-    def __init__(self, args, rank, config_env, config_baseline):
+    def __init__(self, args, rank, config_env, config_baseline, dataset):
         if args.visualize:
             plt.ion()
         if args.print_images or args.visualize:
@@ -73,17 +78,17 @@ class Exploration_Env(RLEnv):
         config_env.defrost()
         config_env.SIMULATOR.ACTION_SPACE_CONFIG = \
                 "CustomActionSpaceConfiguration"
-        config_env.TASK.POSSIBLE_ACTIONS = config_env.TASK.POSSIBLE_ACTIONS + ['NOISY_FORWARD', 'NOISY_RIGHT', 'NOISY_LEFT']
-        config_env.TASK.ACTIONS.NOISY_FORWARD = habitat.config.Config()
-        config_env.TASK.ACTIONS.NOISY_FORWARD.TYPE = "NOISYFORWARD"
-        config_env.TASK.ACTIONS.NOISY_RIGHT = habitat.config.Config()
-        config_env.TASK.ACTIONS.NOISY_RIGHT.TYPE = "NOISYRIGHT"
-        config_env.TASK.ACTIONS.NOISY_LEFT = habitat.config.Config()
-        config_env.TASK.ACTIONS.NOISY_LEFT.TYPE = "NOISYLEFT"
+        # config_env.TASK.POSSIBLE_ACTIONS = config_env.TASK.POSSIBLE_ACTIONS + ['NOISY_FORWARD', 'NOISY_RIGHT', 'NOISY_LEFT']
+        # config_env.TASK.ACTIONS.NOISY_FORWARD = habitat.config.Config()
+        # config_env.TASK.ACTIONS.NOISY_FORWARD.TYPE = "NoisyForward"
+        # config_env.TASK.ACTIONS.NOISY_RIGHT = habitat.config.Config()
+        # config_env.TASK.ACTIONS.NOISY_RIGHT.TYPE = "NoisyRight"
+        # config_env.TASK.ACTIONS.NOISY_LEFT = habitat.config.Config()
+        # config_env.TASK.ACTIONS.NOISY_LEFT.TYPE = "NoisyLeft"
         config_env.freeze()
 
 
-        super().__init__(config_env)
+        super().__init__(config_env, dataset)
 
         self.action_space = gym.spaces.Discrete(self.num_actions)
 
@@ -101,23 +106,6 @@ class Exploration_Env(RLEnv):
                                       interpolation = Image.NEAREST)])
         self.scene_name = None
         self.maps_dict = {}
-        # if config.DIFFICULTY == 'easy':
-        #     self.habitat_env.difficulty = 'easy'
-        #     self.habitat_env.MIN_DIST, self.habitat_env.MAX_DIST = 1.0, 3.0
-        # elif config.DIFFICULTY == 'medium':
-        #     self.habitat_env.difficulty = 'medium'
-        #     self.habitat_env.MIN_DIST, self.habitat_env.MAX_DIST = 3.0, 5.0
-        # elif config.DIFFICULTY == 'hard':
-        #     self.habitat_env.difficulty = 'hard'
-        #     self.habitat_env.MIN_DIST, self.habitat_env.MAX_DIST = 5.0, 10.0
-        # elif config.DIFFICULTY == 'random':
-        #     self.habitat_env.difficulty = 'random'
-        #     self.habitat_env.MIN_DIST, self.habitat_env.MAX_DIST = 3.0, 10.0
-        # else:
-        #     raise NotImplementedError
-        #
-        # self.num_goals = config.NUM_GOALS
-        # self.habitat_env._num_goals = config.NUM_GOALS
 
     def randomize_env(self):
         self._env._episode_iterator._shuffle_iterator()
@@ -164,12 +152,12 @@ class Exploration_Env(RLEnv):
         self.prev_explored_area = 0.
 
         # Preprocess observations
-        rgb = obs['panoramic_rgb'].astype(np.uint8)
+        rgb = obs['rgb'].astype(np.uint8)
         self.obs = rgb # For visualization
         if self.args.frame_width != self.args.env_frame_width:
             rgb = np.asarray(self.res(rgb))
         state = rgb.transpose(2, 0, 1)
-        depth = _preprocess_depth(obs['panoramic_depth'])
+        depth = _preprocess_depth(obs['depth'])
 
         # Initialize map and pose
         self.map_size_cm = args.map_size_cm
@@ -237,14 +225,14 @@ class Exploration_Env(RLEnv):
             obs, rew, done, info = super().step(action)
 
         # Preprocess observations
-        rgb = obs['panoramic_rgb'].astype(np.uint8)
+        rgb = obs['rgb'].astype(np.uint8)
         self.obs = rgb # For visualization
         if self.args.frame_width != self.args.env_frame_width:
             rgb = np.asarray(self.res(rgb))
 
         state = rgb.transpose(2, 0, 1)
 
-        depth = _preprocess_depth(obs['panoramic_depth'])
+        depth = _preprocess_depth(obs['depth'])
 
         # Get base sensor and ground-truth pose
         dx_gt, dy_gt, do_gt = self.get_gt_pose_change()
